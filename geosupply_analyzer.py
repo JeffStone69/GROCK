@@ -71,8 +71,13 @@ def structured_log(event_type: str, data: dict) -> str:
         f.write(json.dumps(log_entry) + "\n")
     return corr_id
 
+@st.cache_resource
+def get_db():
+    init_db()  # this now only runs once per app start
+    return get_db_connection()
+
 def init_db():
-    conn = sqlite3.connect("geosupply.db")
+    conn = sqlite3.connect("geosupply.db", timeout=15.0)
     c = conn.cursor()
     c.executescript("""
         CREATE TABLE IF NOT EXISTS weights_history (
@@ -119,7 +124,7 @@ def init_db():
 init_db()
 
 def get_db_connection():
-    return sqlite3.connect("geosupply.db", check_same_thread=False)
+    return sqlite3.connect("geosupply.db", timeout=15.0, check_same_thread=False)
 
 # ========================= HISTORICAL DB KEEPS UP TO DATE =========================
 def update_stock_prices(ticker: str, days: int = 30):
