@@ -1,0 +1,54 @@
+﻿Ticker,Company,Market,Currency,Price,Change %,RSI,Rebound Score,Profit Opp %,Volume
+QUB.AX,Qube Holdings Limited,ASX,AUD,5,0.5,85.7,148,17.8,2011758
+ASX.AX,ASX Limited,ASX,AUD,58.71,0.51,85.5,86.2,10.3,751996
+TCL.AX,Transurban Group,ASX,AUD,13.67,0.22,73.3,67.5,8.1,2733739
+AGL.AX,AGL Energy Limited,ASX,AUD,9.67,0.42,71.4,50.8,6.1,758074
+ZIM,ZIM Integrated Shipping Services Ltd.,US,USD,26.39,0.17,50,49.1,5.9,73630
+AEM,Agnico Eagle Mines Limited,US,USD,218.73,0.11,73.6,47.5,5.7,79088
+NEM,Newmont Corporation,US,USD,120.84,0.04,68.1,45.1,5.4,199773
+CVX,Chevron Corporation,US,USD,188.54,0.01,83.9,43.6,5.2,382351
+AAPL,Apple Inc.,US,USD,260.38,-0.03,70.3,38.2,4.6,665204
+ENPH,"Enphase Energy, Inc.",US,USD,31.19,-0.06,73.8,38.1,4.6,195175
+COP,ConocoPhillips,US,USD,122.54,-0.05,68.6,34.7,4.2,789668
+MATX,"Matson, Inc.",US,USD,171.09,-0.34,35.8,34.5,4.1,12355
+VALE,Vale S.A.,US,USD,16.97,-0.09,22.7,34,4.1,867307
+FCX,Freeport-McMoRan Inc.,US,USD,67.84,-0.04,26.2,33.3,4,330029
+TSLA,"Tesla, Inc.",US,USD,348.895,0.04,67.6,31.4,3.8,565757
+CCJ,Cameco Corporation,US,USD,116.1,0,20.8,30.9,3.7,100789
+S32.AX,South32 Limited,ASX,AUD,4.63,0.43,66.7,30.1,3.6,4180092
+BPT.AX,Beach Energy Limited,ASX,AUD,1.21,-0.41,36,27.4,3.3,234780
+NVDA,NVIDIA Corporation,US,USD,188.64,-0.01,35.5,27.3,3.3,1895632
+FSLR,"First Solar, Inc.",US,USD,203.52,0.1,63.7,26.6,3.2,40540
+DAC,Danaos Corporation,US,USD,115.03,-0.23,50.6,24.6,3,3735
+AMD,"Advanced Micro Devices, Inc.",US,USD,245.02,0.04,35.2,24.3,2.9,447239
+360.AX,"Life360, Inc.",ASX,AUD,19.48,-0.15,43.2,24,2.9,153163
+CMRE,Costamare Inc.,US,USD,17.24,0.38,65.4,23.4,2.8,14322
+XRO.AX,Xero Limited,ASX,AUD,71.46,-0.29,29.8,22.7,2.7,249622
+ORG.AX,Origin Energy Limited,ASX,AUD,12.38,0.41,64,22.5,2.7,1938412
+NEE,"NextEra Energy, Inc.",US,USD,94.11,-0.08,59.1,22.5,2.7,140123
+BHP.AX,BHP Group Limited,ASX,AUD,53.98,0,32,21.5,2.6,2920
+CWEN,"Clearway Energy, Inc.",US,USD,41.07,-0.05,43.3,21.1,2.5,15063
+GOOGL,Alphabet Inc.,US,USD,317.25,0.02,38.1,20.7,2.5,482105
+STO.AX,Santos Limited,ASX,AUD,7.88,0,27.3,19.1,2.3,63105
+MSFT,Microsoft Corporation,US,USD,370.87,0.02,39.4,18.8,2.3,524131
+RIO.AX,Rio Tinto Group,ASX,AUD,171.23,-0.01,29.2,18.7,2.2,298886
+OXY,Occidental Petroleum Corporation,US,USD,57.995,-0.05,50,17.7,2.1,294164
+XOM,Exxon Mobil Corporation,US,USD,152.3,0.02,54.2,17.6,2.1,768494
+MEZ.AX,Meridian Energy Limited,ASX,AUD,4.64,0.43,70,16.8,2,98
+NXT.AX,NEXTDC Limited,ASX,AUD,12.82,-0.62,23.5,16.5,2,659703
+TNE.AX,Technology One Limited,ASX,AUD,27.69,0.27,72.5,14,1.7,372532
+SCCO,Southern Copper Corporation,US,USD,192.51,0.18,65.9,13.8,1.7,50884
+SBLK,Star Bulk Carriers Corp.,US,USD,24.235,0.02,57.7,13.8,1.7,32321
+GOLD,"Gold.com, Inc.",US,USD,44,0.18,34.4,12.6,1.5,6927
+BEPC,Brookfield Renewable Corporation,US,USD,42.55,-0.05,53.1,11.5,1.4,36302
+IFT.AX,Infratil Limited,ASX,AUD,10.04,0.3,52.4,10.7,1.3,113693
+PME.AX,Pro Medicus Limited,ASX,AUD,126.92,0.17,55.6,9.2,1.1,84439
+CEN.AX,Contact Energy Limited,ASX,AUD,7.81,0.77,64.1,7.9,0.9,13
+MCY.AX,Mercury NZ Limited,ASX,AUD,5.31,0,47.9,6.8,0.8,8
+WDS.AX,Woodside Energy Group Ltd,ASX,AUD,33.28,0,85.2,6.7,0.8,8644
+MIN.AX,Mineral Resources Limited,ASX,AUD,57.98,-0.29,35,5.8,0.7,239881
+REA.AX,REA Group Limited,ASX,AUD,158.56,-0.03,69.2,1.2,0.1,403
+WHC.AX,Whitehaven Coal Limited,ASX,AUD,8.12,0,57.1,1,0.1,20603
+IGO.AX,IGO Limited,ASX,AUD,8.15,0,53.8,0.4,0,8315
+WTC.AX,WiseTech Global Limited,ASX,AUD,37.63,-1.39,20.3,-4.8,-0.6,676683
+FMG.AX,Fortescue Ltd,ASX,AUD,20.26,0.25,46.3,-28.4,-3.4,2192197

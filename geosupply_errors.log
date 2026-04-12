@@ -1,0 +1,86 @@
+2026-04-12 07:34:10,628 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:34:10,635 - ERROR - 
+1 Failed download:
+2026-04-12 07:34:10,636 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:17,335 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:23,477 - ERROR - 
+1 Failed download:
+2026-04-12 07:35:23,477 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:23,477 - ERROR - 
+1 Failed download:
+2026-04-12 07:35:23,479 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:24,324 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:37,996 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:43,518 - ERROR - 
+1 Failed download:
+2026-04-12 07:35:43,518 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:43,521 - ERROR - 
+1 Failed download:
+2026-04-12 07:35:43,522 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:35:47,146 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 07:38:48,089 - ERROR - Unexpected Grok error: Responses.create() got an unexpected keyword argument 'max_tokens'
+2026-04-12 07:39:56,139 - ERROR - Unexpected Grok error: Responses.create() got an unexpected keyword argument 'max_tokens'
+2026-04-12 08:58:41,862 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 08:58:42,965 - ERROR - 
+1 Failed download:
+2026-04-12 08:58:42,965 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 08:58:50,994 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 08:58:53,144 - ERROR - 
+1 Failed download:
+2026-04-12 08:58:53,144 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:09:41,497 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:09:41,500 - ERROR - 
+1 Failed download:
+2026-04-12 09:09:41,500 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:09:53,340 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:09:54,420 - ERROR - 
+1 Failed download:
+2026-04-12 09:09:54,420 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:09:58,956 - ERROR - HTTP Error 401: {"finance":{"result":null,"error":{"code":"Unauthorized","description":"Invalid Crumb"}}}
+2026-04-12 09:09:58,968 - ERROR - HTTP Error 401: {"finance":{"result":null,"error":{"code":"Unauthorized","description":"User is unable to access this feature - https://bit.ly/yahoo-finance-api-feedback"}}}
+2026-04-12 09:10:07,217 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:10:08,488 - ERROR - 
+1 Failed download:
+2026-04-12 09:10:08,488 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:11:57,248 - ERROR - Unexpected Grok error: Responses.create() got an unexpected keyword argument 'max_tokens'
+2026-04-12 09:12:19,537 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:12:20,759 - ERROR - 
+1 Failed download:
+2026-04-12 09:12:20,759 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:13:17,526 - ERROR - HTTP Error 401: {"finance":{"result":null,"error":{"code":"Unauthorized","description":"Invalid Crumb"}}}
+2026-04-12 09:13:23,772 - ERROR - HTTP Error 401: {"finance":{"result":null,"error":{"code":"Unauthorized","description":"Invalid Crumb"}}}
+2026-04-12 09:13:23,772 - ERROR - HTTP Error 401: {"finance":{"result":null,"error":{"code":"Unauthorized","description":"User is unable to access this feature - https://bit.ly/yahoo-finance-api-feedback"}}}
+2026-04-12 09:13:30,978 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 09:13:32,016 - ERROR - 
+1 Failed download:
+2026-04-12 09:13:32,016 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:26:51,608 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:26:55,287 - ERROR - 
+1 Failed download:
+2026-04-12 11:26:55,288 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:27:06,556 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:27:12,123 - ERROR - HTTP Error 401: {"finance":{"result":null,"error":{"code":"Unauthorized","description":"User is unable to access this feature - https://bit.ly/yahoo-finance-api-feedback"}}}
+2026-04-12 11:27:15,731 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:27:20,346 - ERROR - 
+1 Failed download:
+2026-04-12 11:27:20,346 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:27:20,360 - ERROR - 
+1 Failed download:
+2026-04-12 11:27:20,360 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:27:20,361 - ERROR - 
+1 Failed download:
+2026-04-12 11:27:20,361 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:27:22,790 - ERROR - Data fetch failed: dictionary changed size during iteration
+2026-04-12 11:27:26,339 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:56:12,581 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 11:56:16,874 - ERROR - 
+1 Failed download:
+2026-04-12 11:56:16,874 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 12:10:38,059 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 12:10:43,830 - ERROR - 
+1 Failed download:
+2026-04-12 12:10:43,830 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=5d) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 12:11:31,935 - ERROR - $RNE.AX: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
+2026-04-12 12:11:36,249 - ERROR - 
+1 Failed download:
+2026-04-12 12:11:36,249 - ERROR - ['RNE.AX']: possibly delisted; no price data found  (period=6mo) (Yahoo error = "No data found, symbol may be delisted")
