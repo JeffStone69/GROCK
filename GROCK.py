@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 """
-GeoSupply Rebound Oracle v4.0 — Self-Evolving • Grok-History-Correlated • Multi-Region + Macro • AWS Ready
-Major evolutionary leap from https://github.com/JeffStone69/GROCK (analyserV4.py base)
-Production-optimized single-file Streamlit app • April 13 2026 Edition
+GROCK.py — GeoSupply Rebound Oracle v4.0 Console Edition
+Self-Evolving • Grok-History-Correlated • Multi-Region + Macro
+Production-ready single-file console application
 """
 
-import streamlit as st
 import pandas as pd
 import numpy as np
 import yfinance as yf
@@ -18,48 +17,16 @@ from datetime import datetime, timedelta
 import hashlib
 from typing import Dict, List, Tuple, Optional
 import time
-import plotly.graph_objects as go
-from io import BytesIO
 
-# OPTIONAL AWS S3 backup
-try:
-    import boto3
-    AWS_AVAILABLE = True
-except ImportError:
-    boto3 = None
-    AWS_AVAILABLE = False
-
-# ========================= CONFIG & PAGE =========================
-st.set_page_config(
-    page_title="GeoSupply Rebound Oracle v4.0",
-    page_icon="🌍",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-# Dark mode native (Streamlit 1.28+ auto-detects, forced CSS fallback)
-st.markdown("""
-    <style>
-    .stApp { background-color: #0E1117; color: #FAFAFA; }
-    .css-1d391kg { background-color: #0E1117; }
-    </style>
-    """, unsafe_allow_html=True)
-
-ALPHA_VANTAGE_KEY = (
-    st.secrets.get("alpha_vantage", {}).get("key")
-    or os.getenv("ALPHA_VANTAGE_KEY")
-    or "CXJGLOIMINTIXQLE"
-)
-GROK_API_KEY = st.secrets.get("grok", {}).get("key") or os.getenv("GROK_API_KEY")
+ALPHA_VANTAGE_KEY = os.getenv("ALPHA_VANTAGE_KEY") or "CXJGLOIMINTIXQLE"
+GROK_API_KEY = os.getenv("GROK_API_KEY")
 
 CURRENT_DATE = datetime.now().strftime("%B %d, %Y")
 CURRENT_YEAR = datetime.now().year
 
-# ========================= LOGGING & DB =========================
 logging.basicConfig(filename="geosupply_errors.log", level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 
 def structured_log(event_type: str, data: dict) -> str:
-    """Structured JSON logging with correlation ID for every Grok/DB event."""
     corr_id = hashlib.md5(f"{datetime.now().isoformat()}{event_type}".encode()).hexdigest()[:12]
     log_entry = {
         "timestamp": datetime.now().isoformat(),
@@ -70,11 +37,6 @@ def structured_log(event_type: str, data: dict) -> str:
     with open("grok_responses.log", "a", encoding="utf-8") as f:
         f.write(json.dumps(log_entry) + "\n")
     return corr_id
-
-@st.cache_resource
-def get_db():
-    init_db()  # this now only runs once per app start
-    return get_db_connection()
 
 def init_db():
     conn = sqlite3.connect("geosupply.db", timeout=15.0)
@@ -126,13 +88,10 @@ init_db()
 def get_db_connection():
     return sqlite3.connect("geosupply.db", timeout=15.0, check_same_thread=False)
 
-# ========================= HISTORICAL DB KEEPS UP TO DATE =========================
 def update_stock_prices(ticker: str, days: int = 30):
-    """Keep DB up-to-date with Alpha Vantage + yfinance fallback for all relevant stock data."""
     conn = get_db_connection()
     c = conn.cursor()
     try:
-        # Alpha Vantage daily (most accurate historical)
         url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={ticker}&outputsize=compact&apikey={ALPHA_VANTAGE_KEY}"
         r = requests.get(url, timeout=10).json()
         time_series = r.get("Time Series (Daily)", {})
@@ -152,7 +111,6 @@ def update_stock_prices(ticker: str, days: int = 30):
             ))
         conn.commit()
     except Exception:
-        # Fallback yfinance
         df = yf.download(ticker, period=f"{days}d", progress=False)
         for idx, row in df.iterrows():
             c.execute("""
@@ -165,7 +123,6 @@ def update_stock_prices(ticker: str, days: int = 30):
         conn.close()
 
 def rebuild_historical_database():
-    """Seed + maintain historical Grok theses for correlation engine."""
     conn = get_db_connection()
     c = conn.cursor()
     c.execute("DELETE FROM grok_analyses WHERE timestamp < ?", (datetime.now() - timedelta(days=365)).isoformat(),)
@@ -189,27 +146,19 @@ def rebuild_historical_database():
     conn.close()
     return len(samples)
 
-# ========================= CACHED DATA =========================
-@st.cache_data(ttl=180)
 def fetch_ticker_data(ticker: str) -> pd.DataFrame:
-    try:
-        update_stock_prices(ticker)  # keep DB fresh
-        df = yf.download(ticker, period="15d", progress=False)
-        return df.reset_index() if not df.empty else pd.DataFrame()
-    except Exception as e:
-        st.error(f"Data fetch error for {ticker}: {e}")
-        return pd.DataFrame()
+    update_stock_prices(ticker)
+    df = yf.download(ticker, period="15d", progress=False)
+    return df.reset_index() if not df.empty else pd.DataFrame()
 
-@st.cache_data(ttl=600)
 def fetch_macro_data() -> Dict:
     try:
         vix = yf.download("^VIX", period="5d", progress=False)['Close'].iloc[-1]
         tnx = yf.download("^TNX", period="5d", progress=False)['Close'].iloc[-1]
         return {"VIX": round(float(vix), 1), "TNX": round(float(tnx), 2)}
     except:
-        return {"VIX": 19.5, "TNX": 4.28}  # realistic April 2026 baseline
+        return {"VIX": 19.5, "TNX": 4.28}
 
-# ========================= SIGNAL ENGINE (enhanced with interaction terms) =========================
 class SignalEngine:
     DEFAULT_WEIGHTS = {
         'rsi': 0.20, 'stoch': 0.15, 'bb': 0.12, 'drawdown': 0.18,
@@ -218,7 +167,7 @@ class SignalEngine:
     }
 
     @staticmethod
-    def compute_signals(df: pd.DataFrame, weights: Optional[Dict] = None) -> Tuple[float, Dict]:
+    def compute_signals(df: pd.DataFrame, weights=None) -> Tuple[float, Dict]:
         if weights is None:
             weights = SignalEngine.DEFAULT_WEIGHTS.copy()
         if df.empty or len(df) < 10:
@@ -227,14 +176,12 @@ class SignalEngine:
         df = df.copy()
         close = df['Close']
 
-        # Technicals (NaN-safe)
         delta = close.diff()
         gain = delta.where(delta > 0, 0).rolling(14, min_periods=1).mean()
         loss = -delta.where(delta < 0, 0).rolling(14, min_periods=1).mean()
         rs = gain / loss.replace(0, 1e-8)
         rsi = 100 - (100 / (1 + rs))
 
-        # Stoch & BB simplified
         low14 = close.rolling(14).min()
         high14 = close.rolling(14).max()
         stoch = 100 * (close - low14) / (high14 - low14 + 1e-8)
@@ -243,7 +190,7 @@ class SignalEngine:
         bb_width = (bb_upper - bb_lower) / close.rolling(20).mean()
 
         macro = fetch_macro_data()
-        days_to_opex = 4  # April 13 2026 → next OPEX Friday ~4 days (realistic)
+        days_to_opex = 4
 
         df['RSI_Z'] = (rsi - 50) / 15
         df['Stoch_Z'] = (stoch - 50) / 25
@@ -253,13 +200,11 @@ class SignalEngine:
         df['MACD_Z'] = (close.ewm(span=12).mean() - close.ewm(span=26).mean()).ewm(span=9).mean() / close.ewm(span=26).mean()
         df['VIX_Z'] = (macro['VIX'] - 18) / 5
         df['OPEX_Z'] = (5 - days_to_opex) / 5.0
-        df['Gamma_Z'] = df['VolSpike_Z'] * 0.6  # dealer gamma proxy
+        df['Gamma_Z'] = df['VolSpike_Z'] * 0.6
 
-        # NEW INTERACTION TERMS
         df['VIX_x_Drawdown'] = df['VIX_Z'] * df['Drawdown_Z']
         df['OPEX_x_Vol'] = df['OPEX_Z'] * df['VolSpike_Z']
 
-        # Weighted Rebound Score
         score = (
             weights['rsi'] * df['RSI_Z'].iloc[-1] +
             weights['stoch'] * df['Stoch_Z'].iloc[-1] +
@@ -270,10 +215,10 @@ class SignalEngine:
             weights['vix_regime'] * df['VIX_Z'].iloc[-1] +
             weights['opex_proximity'] * df['OPEX_Z'].iloc[-1] +
             weights['gamma_proxy'] * df['Gamma_Z'].iloc[-1] +
-            0.08 * df['VIX_x_Drawdown'].iloc[-1] +      # interaction boost
+            0.08 * df['VIX_x_Drawdown'].iloc[-1] +
             0.07 * df['OPEX_x_Vol'].iloc[-1]
         )
-        rebound_score = max(10, min(95, 35 + score * 18))  # calibrated 0-100 scale
+        rebound_score = max(10, min(95, 35 + score * 18))
 
         features = {
             'rsi': df['RSI_Z'].iloc[-1],
@@ -284,9 +229,7 @@ class SignalEngine:
         }
         return round(rebound_score, 1), features
 
-# ========================= HISTORY CORRELATION ENGINE =========================
 def get_history_correlation(ticker: str, current_score: float, current_features: Dict) -> Tuple[str, float]:
-    """Temporal pattern matching against past Grok theses."""
     conn = get_db_connection()
     df_hist = pd.read_sql_query("""
         SELECT ticker, rebound_score, profit_opp, thesis, analogue_match, win_rate, simulated_return
@@ -295,17 +238,15 @@ def get_history_correlation(ticker: str, current_score: float, current_features:
     conn.close()
     if df_hist.empty:
         return "No historical analogues yet", 0.0
-    # Simple similarity: Euclidean on score + profit
     df_hist['dist'] = np.sqrt((df_hist['rebound_score'] - current_score)**2 + (df_hist['profit_opp'] - 3.5)**2)
     best = df_hist.loc[df_hist['dist'].idxmin()]
     match_str = f"{best['analogue_match']} → {best['win_rate']}% historical win rate (profit opp {best['profit_opp']:.1f}%)"
     return match_str, best['win_rate']
 
-# ========================= GROK CLIENT (2026 API) =========================
 def call_grok_thesis(ticker: str, rebound_score: float, features: Dict, history_match: str) -> Dict:
-    """Grok high-conviction thesis with auto-injected history correlation."""
+    global GROK_API_KEY
     if not GROK_API_KEY:
-        return {"thesis": "GROK_API_KEY not configured", "profit_opp": 0.0, "exit_window": "N/A"}
+        return {"thesis": "GROK_API_KEY not configured", "profit_opp": 0.0, "exit_window": "N/A", "correlation_id": "NONE"}
 
     prompt = f"""
     You are the GeoSupply Rebound Oracle v4.0. Current date: {CURRENT_DATE}.
@@ -348,34 +289,23 @@ def call_grok_thesis(ticker: str, rebound_score: float, features: Dict, history_
         structured_log("grok_error", {"error": str(e)})
         return {"thesis": f"API error: {e}", "profit_opp": 0.0, "exit_window": 0, "correlation_id": "ERROR"}
 
-# ========================= TRUE SELF-LEARNING LOOP (Bayesian-style online optimizer) =========================
 def self_learn_update(rebound_score: float, profit_opp: float, features: Dict, simulated_return: float = 0.0):
-    """True self-learning: correlate Rebound Score / Profit Opp with past theses + simulated returns.
-    Pulls from grok_analyses + weights_history. Lightweight numpy online optimizer (replaces manual ridge)."""
     conn = get_db_connection()
     df_past = pd.read_sql_query("SELECT rebound_score, profit_opp, simulated_return FROM grok_analyses", conn)
     conn.close()
 
     if len(df_past) < 5:
-        return  # not enough data yet
+        return
 
-    # Feature vector for regression (simple linear)
-    X = np.array([[v for v in features.values()]])
-    y = np.array([profit_opp])
-
-    # Current weights as vector
     w_vec = np.array(list(SignalEngine.DEFAULT_WEIGHTS.values()))
-    # Simple gradient step toward better correlation
     eta = 0.015
     error = profit_opp - np.dot(w_vec[:len(features)], list(features.values()))
     w_vec[:len(features)] += eta * error * np.array(list(features.values()))
 
-    # Normalize & persist
     w_vec = np.clip(w_vec, 0.01, 0.4)
     w_vec /= w_vec.sum()
     new_weights = dict(zip(SignalEngine.DEFAULT_WEIGHTS.keys(), w_vec))
 
-    # Save to history
     conn = get_db_connection()
     c = conn.cursor()
     corr_id = structured_log("self_learn", {"performance": profit_opp})
@@ -392,12 +322,10 @@ def self_learn_update(rebound_score: float, profit_opp: float, features: Dict, s
     conn.commit()
     conn.close()
 
-    # Update global default for session
     SignalEngine.DEFAULT_WEIGHTS.update(new_weights)
-    st.success(f"✅ Self-learning complete. Weights evolved. Corr-ID: {corr_id}")
+    print(f"✅ Self-learning complete. Weights evolved. Corr-ID: {corr_id}")
 
 def get_grok_evolution_report() -> pd.DataFrame:
-    """Grok Evolution Report: weight drift + correlation strength."""
     conn = get_db_connection()
     df = pd.read_sql_query("SELECT timestamp, weights, performance_score FROM weights_history ORDER BY timestamp", conn)
     conn.close()
@@ -409,9 +337,7 @@ def get_grok_evolution_report() -> pd.DataFrame:
     drift['performance'] = df['performance_score']
     return drift
 
-# ========================= ADVANCED BACKTESTER =========================
 def run_backtester(ticker: str, rebound_score: float, n_paths: int = 10000):
-    """Exact Grok-suggested: 0.3% trailing stop, volume gate, OPEX-aware exits."""
     df = fetch_ticker_data(ticker)
     if df.empty or len(df) < 10:
         return None
@@ -419,19 +345,16 @@ def run_backtester(ticker: str, rebound_score: float, n_paths: int = 10000):
     vol = returns.std() * np.sqrt(252)
     mu = returns.mean() * 252
 
-    paths = np.zeros((n_paths, 5))  # 5-day forward simulation
+    paths = np.zeros((n_paths, 5))
     for i in range(n_paths):
         path = np.cumprod(1 + np.random.normal(mu/252, vol/np.sqrt(252), 5))
-        # Volume gate: only enter if recent volume > 1.2x avg
         if df['Volume'].iloc[-1] / df['Volume'].rolling(5).mean().iloc[-1] < 1.2:
             path[0] = 1.0
-        # Trailing stop 0.3%
         for t in range(1, 5):
             if path[t] < path[t-1] * 0.997:
                 path[t:] = path[t-1] * 0.997
                 break
-        # OPEX-aware exit (force close on day 4 if near OPEX)
-        if 3 <= 4:  # next OPEX proximity
+        if True:
             path[-1] = path[-1] * 0.98
         paths[i] = path
 
@@ -445,140 +368,134 @@ def run_backtester(ticker: str, rebound_score: float, n_paths: int = 10000):
         "paths": sim_returns
     }
 
-# ========================= UI =========================
-st.title("🌍 GeoSupply Rebound Oracle v4.0")
-st.caption(f"Self-Evolving • Grok-History-Correlated • Multi-Region + Macro • Live as of {CURRENT_DATE} | AWS Ready")
+def main():
+    global GROK_API_KEY, ALPHA_VANTAGE_KEY
 
-# Sidebar controls
-with st.sidebar:
-    st.header("⚙️ Controls")
-    if st.button("🔄 Rebuild Historical DB + Seed Analogues"):
-        n = rebuild_historical_database()
-        st.success(f"DB rebuilt with {n} fresh analogues")
-    refresh = st.button("🔄 Refresh All Markets")
-    if refresh:
-        st.rerun()
+    print("\n🌍 GeoSupply Rebound Oracle v4.0 — Console Edition")
+    print(f"Self-Evolving • Grok-History-Correlated • Production Ready")
+    print(f"Live as of {CURRENT_DATE}\n")
 
-    st.subheader("Multi-Region Watchlist")
-    watchlist = st.text_area("Tickers (one per line)", "TSLA\nNVDA\n9988.HK\nVOD.L\nBP.L\nGLEN.L\nFMG.AX\nBTC-USD", height=200)
-    tickers = [t.strip().upper() for t in watchlist.split("\n") if t.strip()]
+    if not GROK_API_KEY:
+        GROK_API_KEY = input("Enter your Grok (x.ai) API key: ").strip()
+    if not GROK_API_KEY:
+        print("Warning: Grok API key not provided. Thesis generation will be disabled.\n")
 
-# Live Multi-Market Dashboard Tab
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-    "📡 Live Multi-Market Dashboard",
-    "🔍 Signal Scanner",
-    "🧠 Grok Thesis Generator",
-    "📈 Backtester",
-    "🧬 Self-Learning Evolution",
-    "📜 History Correlation Engine"
-])
+    if ALPHA_VANTAGE_KEY == "CXJGLOIMINTIXQLE":
+        key_input = input("Enter Alpha Vantage API key (or press Enter to use demo key): ").strip()
+        if key_input:
+            ALPHA_VANTAGE_KEY = key_input
 
-with tab1:
-    st.subheader("Live Multi-Market Status")
-    macro = fetch_macro_data()
-    col1, col2, col3, col4 = st.columns(4)
-    col1.metric("VIX", macro['VIX'], delta=None)
-    col2.metric("10Y Yield", f"{macro['TNX']}%")
-    col3.metric("Next OPEX", "Apr 17 2026 (4 days)")
-    col4.metric("Gamma Regime", "Neutral → Slight Flip", delta="Bullish skew compression")
+    default_tickers = ["TSLA", "NVDA", "9988.HK", "VOD.L", "BP.L", "GLEN.L", "FMG.AX", "BTC-USD"]
 
-    # Region banners
-    st.markdown("**Europe** (VOD.L, BP.L, GLEN.L) 🟢 Open | **Asia** (9988.HK) 🔴 Closed | **ASX** 🟢 Open | **Crypto 24/7** 🟢")
+    while True:
+        print("\n" + "="*70)
+        print("                  MAIN MENU")
+        print("="*70)
+        print("1. Live Multi-Market Dashboard")
+        print("2. Signal Scanner")
+        print("3. Grok High-Conviction Thesis Generator")
+        print("4. Advanced Backtester (10k paths)")
+        print("5. Self-Learning Evolution Report")
+        print("6. History Correlation Engine")
+        print("7. Rebuild Historical DB + Seed Analogues")
+        print("8. Refresh All Data")
+        print("0. Exit")
+        choice = input("\nSelect option (0-8): ").strip()
 
-    leaderboard = []
-    for t in tickers[:12]:
-        df = fetch_ticker_data(t)
-        if not df.empty:
+        if choice == "0":
+            print("Goodbye!")
+            break
+
+        elif choice == "1":
+            macro = fetch_macro_data()
+            print(f"\nMacro Snapshot → VIX: {macro['VIX']} | 10Y Yield: {macro['TNX']}% | Next OPEX: ~4 days")
+            print("Region Status: Europe Open | Asia Closed | ASX Open | Crypto 24/7\n")
+            for t in default_tickers:
+                df = fetch_ticker_data(t)
+                if not df.empty:
+                    score, _ = SignalEngine.compute_signals(df)
+                    last_price = round(df['Close'].iloc[-1], 2)
+                    print(f"{t:10} | Rebound Score: {score:6.1f}/100 | Price: {last_price:8.2f}")
+
+        elif choice == "2":
+            print("\nSignal Scanner")
+            for t in default_tickers:
+                df = fetch_ticker_data(t)
+                if not df.empty:
+                    score, feats = SignalEngine.compute_signals(df)
+                    print(f"\n{t:10} → Rebound Score: {score:.1f}/100")
+                    print(f"   Features: {feats}")
+
+        elif choice == "3":
+            ticker = input("\nEnter ticker for Grok thesis (e.g. TSLA): ").strip().upper()
+            if not ticker:
+                ticker = "TSLA"
+            df = fetch_ticker_data(ticker)
+            if df.empty:
+                print("No data available for ticker.")
+                continue
             score, feats = SignalEngine.compute_signals(df)
-            leaderboard.append({"Ticker": t, "Rebound Score": score, "Last": round(df['Close'].iloc[-1], 2)})
-
-    if leaderboard:
-        lb_df = pd.DataFrame(leaderboard).sort_values("Rebound Score", ascending=False)
-        st.dataframe(lb_df, use_container_width=True, hide_index=True)
-
-with tab2:
-    st.subheader("Signal Scanner")
-    for t in tickers:
-        with st.expander(f"{t} — Live Signals", expanded=False):
-            df = fetch_ticker_data(t)
-            if not df.empty:
-                score, feats = SignalEngine.compute_signals(df)
-                st.metric("Rebound Score", f"{score:.1f}/100", delta=None)
-                st.write("Features:", feats)
-                st.line_chart(df.set_index('Date')['Close'])
-
-with tab3:
-    st.subheader("🧠 Grok High-Conviction Thesis Generator")
-    selected_ticker = st.selectbox("Select ticker for instant Grok thesis", tickers)
-    if st.button(f"Generate Thesis for {selected_ticker}"):
-        df = fetch_ticker_data(selected_ticker)
-        if not df.empty:
-            score, feats = SignalEngine.compute_signals(df)
-            hist_match, win_rate = get_history_correlation(selected_ticker, score, feats)
-            result = call_grok_thesis(selected_ticker, score, feats, hist_match)
-            st.markdown(f"**Thesis** (Corr-ID: {result.get('correlation_id','')})\n\n{result['thesis']}")
-            st.metric("Profit Opportunity", f"{result['profit_opp']:.1f}%")
-            st.metric("Mandatory Exit", f"Next {result['exit_window']} sessions / Friday OPEX")
-            # Trigger self-learning
+            hist_match, win_rate = get_history_correlation(ticker, score, feats)
+            result = call_grok_thesis(ticker, score, feats, hist_match)
+            print(f"\n=== Grok Thesis for {ticker} ===")
+            print(f"Rebound Score: {score:.1f}/100")
+            print(f"Correlation ID: {result.get('correlation_id', 'N/A')}")
+            print("\n" + result['thesis'])
+            print(f"\nProfit Opportunity: {result['profit_opp']:.1f}%")
+            print(f"Mandatory Exit Window: Next {result['exit_window']} sessions / OPEX")
             self_learn_update(score, result['profit_opp'], feats)
 
-with tab4:
-    st.subheader("Advanced Backtester")
-    bt_ticker = st.selectbox("Backtest ticker", tickers, key="bt")
-    if st.button("Run 10,000-Path Monte-Carlo"):
-        df = fetch_ticker_data(bt_ticker)
-        score, _ = SignalEngine.compute_signals(df)
-        result = run_backtester(bt_ticker, score)
-        if result:
-            st.metric("Expected Return (5d)", f"{result['mean_return_pct']}%")
-            st.metric("Win Rate", f"{result['win_rate_pct']}%")
-            st.metric("Sharpe", result['sharpe'])
-            fig = go.Figure()
-            fig.add_histogram(x=result['paths'], nbinsx=80, name="Simulated Returns")
-            st.plotly_chart(fig, use_container_width=True)
-            # Auto self-learn from backtest
-            self_learn_update(score, result['mean_return_pct'], {}, result['mean_return_pct'])
+        elif choice == "4":
+            ticker = input("\nEnter ticker to backtest (e.g. TSLA): ").strip().upper()
+            if not ticker:
+                ticker = "TSLA"
+            df = fetch_ticker_data(ticker)
+            if df.empty:
+                print("No data available.")
+                continue
+            score, _ = SignalEngine.compute_signals(df)
+            print(f"\nRunning 10,000-path Monte Carlo backtest for {ticker}...")
+            result = run_backtester(ticker, score)
+            if result:
+                print(f"\n5-Day Expected Return: {result['mean_return_pct']}%")
+                print(f"Win Rate: {result['win_rate_pct']}%")
+                print(f"Sharpe Ratio: {result['sharpe']}")
+                self_learn_update(score, result['mean_return_pct'], {}, result['mean_return_pct'])
 
-with tab5:
-    st.subheader("🧬 Grok Evolution Report — Weight Drift & Correlation Strength")
-    drift_df = get_grok_evolution_report()
-    if not drift_df.empty:
-        st.line_chart(drift_df.set_index('timestamp')[list(SignalEngine.DEFAULT_WEIGHTS.keys())])
-        st.dataframe(drift_df.tail(10), use_container_width=True)
-    else:
-        st.info("Run more Grok analyses / backtests to activate evolution tracking.")
+        elif choice == "5":
+            print("\nGrok Evolution Report — Weight Drift")
+            drift_df = get_grok_evolution_report()
+            if drift_df.empty:
+                print("No evolution data yet. Run more theses or backtests.")
+            else:
+                print(drift_df.tail(10).to_string(index=False))
 
-with tab6:
-    st.subheader("📜 History Correlation Engine")
-    hist_ticker = st.selectbox("Query historical analogues for", tickers, key="hist")
-    df = fetch_ticker_data(hist_ticker)
-    if not df.empty:
-        score, feats = SignalEngine.compute_signals(df)
-        match, wr = get_history_correlation(hist_ticker, score, feats)
-        st.success(match)
-        st.metric("Historical Win Rate", f"{wr}%")
+        elif choice == "6":
+            ticker = input("\nEnter ticker for history correlation: ").strip().upper()
+            if not ticker:
+                ticker = "TSLA"
+            df = fetch_ticker_data(ticker)
+            if df.empty:
+                print("No data available.")
+                continue
+            score, feats = SignalEngine.compute_signals(df)
+            match, wr = get_history_correlation(ticker, score, feats)
+            print(f"\nHistorical Analogue Match for {ticker}:")
+            print(match)
+            print(f"Historical Win Rate: {wr}%")
 
-# Export & Backup
-st.divider()
-col_exp1, col_exp2, col_exp3 = st.columns(3)
-with col_exp1:
-    if st.button("📤 Export Watchlist Signals to CSV"):
-        df_export = pd.DataFrame([{"Ticker": t} for t in tickers])
-        csv = df_export.to_csv(index=False).encode()
-        st.download_button("Download CSV", csv, "geosupply_watchlist.csv", "text/csv")
-with col_exp2:
-    if st.button("💾 Backup geosupply.db to CSV"):
-        conn = get_db_connection()
-        for table in ["grok_analyses", "weights_history", "saved_signals"]:
-            pd.read_sql(f"SELECT * FROM {table}", conn).to_csv(f"{table}_backup.csv", index=False)
-        st.success("DB tables exported to CSVs")
-with col_exp3:
-    if AWS_AVAILABLE and st.button("☁️ Backup to S3 (AWS)"):
-        try:
-            s3 = boto3.client('s3')
-            # Placeholder — user configures bucket in secrets
-            st.info("S3 backup ready (configure bucket in .streamlit/secrets.toml)")
-        except Exception as e:
-            st.error(f"S3 error: {e}")
+        elif choice == "7":
+            n = rebuild_historical_database()
+            print(f"\n✅ Historical database rebuilt with {n} seed analogues.")
 
-st.caption("✅ Backward compatible • Self-healing SQLite • Structured JSON logs • All mandates fulfilled")
+        elif choice == "8":
+            print("\nRefreshing all market data...")
+            for t in default_tickers:
+                fetch_ticker_data(t)
+            print("All tickers refreshed.")
+
+        else:
+            print("Invalid option. Please select 0-8.")
+
+if __name__ == "__main__":
+    main()
